@@ -1,0 +1,11 @@
+# created by virtualenv automatically
+/bin
+/etc
+/lib
+/share
+.env
+CACHEDIR.TAG
+Dockerfile
+"Elements of Statistical Learning_II_print12_toc.pdf"
+pyvenv.cfg
+rag-notebook-reference.ipynb

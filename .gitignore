@@ -3,6 +3,8 @@
 /etc
 /lib
 /share
+/include
+/lib64
 .env
 CACHEDIR.TAG
 Dockerfile

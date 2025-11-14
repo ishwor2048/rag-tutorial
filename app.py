@@ -138,6 +138,26 @@ def initialize_rag_chain(vector_store, api_key, temperature=0.7, k=3):
     return rag_chain
 
 
+@st.cache_resource
+def build_vector_store_cached(chunks, api_key, persist_directory="./chroma_db"):
+    """
+    Build and cache the vector store for the running Streamlit instance.
+
+    Note: `st.cache_resource` stores the created vector store in memory for the
+    lifetime of the running app instance. Inputs are used as cache keys. For
+    production, consider a hosted vector DB instead of local persistence.
+    """
+    return create_vector_store(chunks, api_key)
+
+
+@st.cache_resource
+def build_rag_chain_cached(vector_store, api_key, temperature=0.7, k=3):
+    """
+    Build and cache the RAG chain for the running Streamlit instance.
+    """
+    return initialize_rag_chain(vector_store, api_key, temperature=temperature, k=k)
+
+
 def get_rag_response(user_query, rag_chain):
     """
     Gets a response from the RAG system for a given user's query.
@@ -294,13 +314,13 @@ def main():
                     # Load and process documents
                     document_chunks = load_and_process_documents(temp_pdf_path)
                     
-                    # Create vector store
-                    st.session_state.vector_store = create_vector_store(document_chunks, api_key)
+                    # Create (or reuse cached) vector store
+                    st.session_state.vector_store = build_vector_store_cached(document_chunks, api_key)
                     
-                    # Initialize RAG chain with temperature parameter
-                    st.session_state.rag_chain = initialize_rag_chain(
+                    # Initialize (or reuse cached) RAG chain with temperature parameter
+                    st.session_state.rag_chain = build_rag_chain_cached(
                         st.session_state.vector_store,
-                        api_key=api_key,
+                        api_key,
                         temperature=temperature,
                         k=k_results
                     )

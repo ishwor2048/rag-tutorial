@@ -166,7 +166,8 @@ def main():
     Main Streamlit application function.
     """
     
-    # Load environment variables
+    # Load environment variables from .env for local development.
+    # On Streamlit Community Cloud prefer `st.secrets` (set via the app's Secrets manager).
     load_dotenv()
     
     # Set page configuration
@@ -263,10 +264,20 @@ def main():
     if "last_file" not in st.session_state:
         st.session_state.last_file = None
     
-    # Check if API key is available
-    api_key = os.getenv("OPENAI_API_KEY")
+    # Check if API key is available (prefer Streamlit secrets on deployed app)
+    # Streamlit Cloud: set the secret `OPENAI_API_KEY` in the Secrets manager (recommended)
+    api_key = None
+    try:
+        api_key = st.secrets.get("OPENAI_API_KEY")
+    except Exception:
+        api_key = None
+
+    # Fallback to environment variable / .env for local development
     if not api_key:
-        st.error("⚠️ Error: OPENAI_API_KEY not found in environment variables. Please set it in your `.env` file.")
+        api_key = os.getenv("OPENAI_API_KEY")
+
+    if not api_key:
+        st.error("⚠️ Error: OPENAI_API_KEY not found. Set it in Streamlit 'Secrets' (preferred) or a local `.env` file.")
         st.stop()
     
     # Document processing
